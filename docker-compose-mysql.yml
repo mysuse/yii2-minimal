@@ -1,0 +1,43 @@
+#This is intended for docker-development environment
+version: '3.2'
+
+services:  
+  #Backend   
+  yii2-minimal:
+    build: ./
+    container_name: yii-minimal
+    ports:
+      - 40811:80
+    volumes:
+      # Re-use local composer cache via host-volume
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      # Mount source-code for development
+      - ./:/app
+    networks:
+        - yii2min-network
+  #MySQL
+  yii2-minimal-mysql:
+    image: mysql:5.7
+    container_name: yii2-min-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=yii2-min@@
+      - MYSQL_DATABASE=yii2min
+      - MYSQL_USER=yii2min
+      - MYSQL_PASSWORD=yii2min@@
+      - TZ=Asia/Jakarta
+    volumes: 
+      - yii2minmysqldata:/var/lib/mysql
+    ports:
+      - 33068:3306
+    networks:
+        - yii2min-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2048m"
+networks:
+    yii2min-network:
+        driver: bridge
+volumes:
+  yii2minmysqldata:
+    driver: local
